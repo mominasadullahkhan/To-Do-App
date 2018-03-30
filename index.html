@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head> 
+  <meta charset="utf-8" />
+  <title> React To-Do </title>    
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react.min.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.0.2/react-dom.min.js"></script>  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.23/browser.min.js"></script> 
+  <link type="text/css" rel="stylesheet" href="style.css">        
+</head>
+<body>
+
+  <div id="container"></div>
+
+  <script type="text/babel">
+
+    var TodoContainer = React.createClass({
+      getInitialState: function() {
+        var counter = (this.props.items) ? this.props.items.length + 1 : 1;
+        return {items: this.props.items || [], counter: counter};
+      },
+      removeItem: function(idx) {
+        var a = this.state.items.filter((v, i) => { if (i !== idx) return v; });
+        this.setState({items: a});
+      },
+      addItem: function(item) {
+        var a = this.state.items.concat([{id: this.state.counter, text: item}]);
+        this.setState({items: a, counter: this.state.counter + 1});
+      },
+      render: function() {
+        var list = this.state.items.map((item, idx) => 
+          <TodoItem key={item.id} item={item.text} removeItem={this.removeItem.bind(null, idx)} />
+        );
+        return (
+          <div id="TodoContainer">
+            <h1>React Todo</h1>
+            <ul>{list}</ul>
+            <TodoInput addItem={this.addItem} />
+          </div>
+        );
+      }
+    });
+
+    var TodoItem = React.createClass({
+      checkItem: function(e) {
+        var text = e.target.parentNode.getElementsByTagName('span')[0];
+        text.classList.contains('line') ? text.classList.remove('line') : text.classList.add('line');
+      },
+      render: function() {
+        return (
+          <li className="TodoItem">
+            <span>{this.props.item}</span>
+            <span className="rem" onClick={this.props.removeItem}>remove</span>
+            <span className="fin" onClick={this.checkItem}>finished</span>
+          </li>
+        );
+      }
+    });
+
+    var TodoInput = React.createClass({
+      shouldComponentUpdate: function(nextProps, nextState) {
+        return false;
+      },
+      handleSubmit: function() {
+        var inp = this.refs.inputText;
+        if (inp.value.trim() !== '') {
+          this.props.addItem(inp.value.trim().substr(0, 50));
+          inp.value = '';
+        }
+      },
+      render: function() {
+        return (
+          <div className="TodoInput">
+            <input type="text" placeholder="to do..." ref="inputText" />
+            <input type="submit" value="add" onClick={this.handleSubmit} />
+          </div>
+        );
+      }
+    });
+
+    ReactDOM.render(
+      <TodoContainer items={[
+        {id: 1, text: 'make breakfast'}, 
+        {id: 2, text: 'go running'}, 
+        {id: 3, text: 'study for exam'}]} />,
+      document.getElementById('container')
+    );
+
+  </script>
+
+</body>  
+</html>
